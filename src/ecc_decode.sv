@@ -116,7 +116,7 @@ module ecc_decode import ecc_pkg::*; #(
 
     for (int unsigned i = 1; i < unsigned'($bits(code_word_t)) + 1; i++) begin
       // if i is a power of two we are indexing a parity bit
-      if (unsigned'(2**$clog2(i)) != i) begin
+      if (unsigned'(2**myclog2(i)) != i) begin
         data_wo_parity[idx] = correct_data[i - 1];
         idx++;
       end
@@ -124,5 +124,23 @@ module ecc_decode import ecc_pkg::*; #(
   end
 
   assign data_o = data_wo_parity;
+
+
+function automatic integer myclog2 (input longint unsigned val);
+  automatic longint unsigned tmp;
+
+  // pragma translate_off
+        `ifndef VERILATOR
+  if (val == 0) begin
+    $fatal(1, "Logarithm of 0 cannot be represented!");
+  end
+        `endif
+  // pragma translate_on
+
+  tmp = val - 1;
+  for (myclog2 = 0; tmp > 0; myclog2++) begin
+    tmp = tmp >> 1;
+  end
+endfunction
 
 endmodule

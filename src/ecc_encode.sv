@@ -47,7 +47,7 @@ module ecc_encode import ecc_pkg::*; #(
     idx = 0;
     for (int unsigned i = 1; i < unsigned'($bits(code_word_t)) + 1; i++) begin
       // if it is not a power of two word it is a normal data index
-      if (unsigned'(2**$clog2(i)) != i) begin
+      if (unsigned'(2**myclog2(i)) != i) begin
         data[i - 1] = data_i[idx];
         idx++;
       end
@@ -74,5 +74,22 @@ module ecc_encode import ecc_pkg::*; #(
 
   assign data_o.code_word = codeword;
   assign data_o.parity = ^codeword;
+
+function automatic integer myclog2 (input longint unsigned val);
+  automatic longint unsigned tmp;
+
+  // pragma translate_off
+        `ifndef VERILATOR
+  if (val == 0) begin
+    $fatal(1, "Logarithm of 0 cannot be represented!");
+  end
+        `endif
+  // pragma translate_on
+
+  tmp = val - 1;
+  for (myclog2 = 0; tmp > 0; myclog2++) begin
+    tmp = tmp >> 1;
+  end
+endfunction
 
 endmodule

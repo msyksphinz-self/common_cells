@@ -55,7 +55,38 @@ package cf_math_pkg;
     /// As typedef:
     ///   `typedef logic [cf_math_pkg::idx_width(NumIdx)-1:0] idx_t`
     function automatic integer unsigned idx_width (input integer unsigned num_idx);
-        return (num_idx > 32'd1) ? unsigned'($clog2(num_idx)) : 32'd1;
+        return (num_idx > 32'd1) ? unsigned'(myclog2(num_idx)) : 32'd1;
     endfunction
 
+
+// Ceiled Binary Logarithm of a Natural Number
+//
+// Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number rounded
+// towards plus infinity.
+//
+// Use this as drop-in replacement for the `$clog2` system function where the latter is not
+// supported by your toolchain.
+// Ceiled Binary Logarithm of a Natural Number
+//
+// Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number rounded
+// towards plus infinity.
+//
+// Use this as drop-in replacement for the `$clog2` system function where the latter is not
+// supported by your toolchain.
+function automatic integer myclog2 (input longint unsigned val);
+  automatic longint unsigned tmp;
+
+  // pragma translate_off
+        `ifndef VERILATOR
+  if (val == 0) begin
+    $fatal(1, "Logarithm of 0 cannot be represented!");
+  end
+        `endif
+  // pragma translate_on
+
+  tmp = val - 1;
+  for (myclog2 = 0; tmp > 0; myclog2++) begin
+    tmp = tmp >> 1;
+  end
+endfunction
 endpackage
